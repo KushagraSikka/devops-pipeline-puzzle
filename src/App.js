@@ -58,12 +58,18 @@ const App = () => {
     }
   }, [time, gameOver, gameStarted]);
 
-  const handleDragStart = (item, index = null) => {
+  const handleDragStart = (e, item, index = null) => {
+    e.dataTransfer.setData('text/plain', ''); // For Firefox compatibility
     setDraggingItem(item);
     setDraggingIndex(index);
   };
 
-  const handleDrop = (targetIndex) => {
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
     if (!draggingItem) return;
 
     const newSolution = [...solution];
@@ -207,7 +213,7 @@ const App = () => {
                   <div
                     key={index}
                     draggable
-                    onDragStart={() => handleDragStart(component)}
+                    onDragStart={(e) => handleDragStart(e, component)}
                     className="flex items-center bg-white border-2 border-blue-200 p-3 rounded-lg cursor-move hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm"
                   >
                     {IconComponent(component)}
@@ -219,17 +225,21 @@ const App = () => {
 
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Your Pipeline</h3>
-              <div className="flex flex-wrap gap-3 min-h-40 p-6 border-2 border-dashed border-blue-300 rounded-lg bg-white">
+              <div 
+                className="flex flex-wrap gap-3 min-h-40 p-6 border-2 border-dashed border-blue-300 rounded-lg bg-white"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, solution.length)}
+              >
                 {solution.map((item, index) => (
                   <div
                     key={index}
                     className="flex items-center group"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => handleDrop(index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
                   >
                     <div
                       draggable
-                      onDragStart={() => handleDragStart(item, index)}
+                      onDragStart={(e) => handleDragStart(e, item, index)}
                       className="flex items-center bg-green-100 border-2 border-green-200 p-3 rounded-lg cursor-move group-hover:bg-green-200 transition-colors relative"
                     >
                       {IconComponent(item)}
@@ -248,8 +258,8 @@ const App = () => {
                 ))}
                 <div
                   className="h-16 w-40 border-2 border-dashed border-blue-200 rounded-lg flex items-center justify-center text-blue-400 hover:border-blue-500 hover:text-blue-500 transition-colors"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(solution.length)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, solution.length)}
                 >
                   Drop here
                 </div>
